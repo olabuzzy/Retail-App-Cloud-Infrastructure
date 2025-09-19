@@ -51,13 +51,9 @@ resource "helm_release" "aws_lb_controller" {
   depends_on = [kubernetes_service_account.alb_controller_sa]
 }
 
-data "aws_eks_cluster" "eks" {
-  name = "staging-altsch_project"
-}
 
-data "aws_eks_cluster_auth" "eks" {
-  name = data.aws_eks_cluster.eks.name
-}
+
+
 
 data "aws_iam_openid_connect_provider" "eks" {
   url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
@@ -78,7 +74,7 @@ resource "aws_iam_role" "alb_controller" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-          "${replace(data.aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+          "${replace(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
         }
       }
     }]
@@ -89,4 +85,5 @@ resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
   role       = aws_iam_role.alb_controller.name
   policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
 }
+
 
