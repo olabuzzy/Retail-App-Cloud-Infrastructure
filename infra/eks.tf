@@ -1,7 +1,7 @@
 resource "aws_iam_role" "eks" {
   name = "${local.env}-${local.eks_name}-eks_cluster"
 
-   assume_role_policy = jsonencode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
       Effect = "Allow",
@@ -23,24 +23,24 @@ resource "aws_iam_role_policy_attachment" "eks_cluster" {
 }
 
 resource "aws_eks_cluster" "eks" {
-  name = "${local.env}-${local.eks_name}"
-  version = local.eks_version
+  name     = "${local.env}-${local.eks_name}"
+  version  = local.eks_version
   role_arn = aws_iam_role.eks.arn
 
   vpc_config {
     endpoint_private_access = false
-    endpoint_public_access = true
+    endpoint_public_access  = true
 
-    subnet_ids = [ 
-        aws_subnet.public_az1.id,
-        aws_subnet.public_az2.id
-     ]
+    subnet_ids = [
+      aws_subnet.public_az1.id,
+      aws_subnet.public_az2.id
+    ]
   }
 
   access_config {
-    authentication_mode = "API"
+    authentication_mode                         = "API"
     bootstrap_cluster_creator_admin_permissions = true
   }
 
-  depends_on = [ aws_iam_role_policy_attachment.eks_cluster, aws_iam_role_policy_attachment.eks_node_policy ]
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster, aws_iam_role_policy_attachment.eks_node_policy]
 }
