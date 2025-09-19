@@ -1,10 +1,12 @@
 # --- Variables ---
 variable "cluster_name" {
   default = "staging-altsch_project"
+  type    = string
 }
 
 variable "region" {
   default = "eu-west-2"
+  type    = string
 }
 
 variable "vpc_id" {
