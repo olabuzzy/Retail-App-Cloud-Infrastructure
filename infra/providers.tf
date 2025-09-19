@@ -10,6 +10,16 @@ terraform {
       source  = "hashicorp/aws"
       version = "~>6.13.0"
     }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.20"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.12"
+    }
+
   }
   backend "s3" {
     bucket         = "project-bedrock-tfstate"
