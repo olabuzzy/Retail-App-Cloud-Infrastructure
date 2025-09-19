@@ -1,29 +1,38 @@
+# IAM Policy for ALB Controller
 resource "aws_iam_policy" "alb_controller" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   description = "IAM policy for AWS Load Balancer Controller"
-  policy      = file("iam-policy.json") # same JSON from the AWS docs
+  policy      = file("iam-policy.json")
 }
 
+# IAM Role for ALB Controller
 resource "aws_iam_role" "alb_controller_role" {
-  name = "AmazonEKSLoadBalancerControllerRole"
+  name = "alb-controller-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Service = "eks.amazonaws.com"
+        Federated = aws_iam_openid_connect_provider.eks.arn
       }
-      Action = "sts:AssumeRole"
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
     }]
   })
 }
 
+# Attach Policy to Role
 resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
   role       = aws_iam_role.alb_controller_role.name
   policy_arn = aws_iam_policy.alb_controller.arn
 }
 
+# Kubernetes Service Account for ALB Controller
 resource "kubernetes_service_account" "alb_controller_sa" {
   metadata {
     name      = "aws-load-balancer-controller"
@@ -34,6 +43,7 @@ resource "kubernetes_service_account" "alb_controller_sa" {
   }
 }
 
+# Helm Release for ALB Controller
 resource "helm_release" "aws_lb_controller" {
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
@@ -48,42 +58,6 @@ resource "helm_release" "aws_lb_controller" {
       vpcId          = aws_vpc.altsch_vpc.id
     })
   ]
+
   depends_on = [kubernetes_service_account.alb_controller_sa]
 }
-
-
-
-
-
-data "aws_iam_openid_connect_provider" "eks" {
-  url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
-}
-
-
-# --- IAM Role for ALB Controller ---
-resource "aws_iam_role" "alb_controller" {
-  name = "alb-controller-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Federated = data.aws_iam_openid_connect_provider.eks.arn
-      },
-      Action = "sts:AssumeRoleWithWebIdentity",
-      Condition = {
-        StringEquals = {
-          "${replace(aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-        }
-      }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
-  role       = aws_iam_role.alb_controller.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
-}
-
-
