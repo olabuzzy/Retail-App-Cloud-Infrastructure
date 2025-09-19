@@ -12,16 +12,19 @@ variable "region" {
 variable "vpc_id" {
   description = "VPC ID where EKS cluster is deployed"
   type        = string
+  default     = aws_vpc.altsch_vpc.id
 }
 
 variable "oidc_provider_arn" {
   description = "Existing OIDC provider ARN for EKS cluster"
   type        = string
+  default     = "arn:aws:iam::733110823125:oidc-provider/oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
 }
 
 variable "oidc_provider_url" {
   description = "Existing OIDC provider URL (without https://)"
   type        = string
+  default     = "https://oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
 }
 
 # --- IAM Policy for ALB Controller ---
