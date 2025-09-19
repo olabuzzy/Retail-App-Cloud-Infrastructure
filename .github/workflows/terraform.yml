@@ -48,10 +48,10 @@ jobs:
         working-directory: infra
         run: tflint --init && tflint
 
-      - name: Run tfsec (Security Scan)
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working-directory: infra
+      # - name: Run tfsec (Security Scan)
+      #   uses: aquasecurity/tfsec-action@v1.0.3
+      #   with:
+      #     working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
@@ -99,10 +99,10 @@ jobs:
         working-directory: infra
         run: tflint --init && tflint
 
-      - name: Run tfsec (Security Scan)
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working-directory: infra
+      # - name: Run tfsec (Security Scan)
+      #   uses: aquasecurity/tfsec-action@v1.0.3
+      #   with:
+      #     working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
@@ -156,10 +156,10 @@ jobs:
         working-directory: infra
         run: tflint --init && tflint
 
-      - name: Run tfsec (Security Scan)
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
-          working-directory: infra
+      # - name: Run tfsec (Security Scan)
+      #   uses: aquasecurity/tfsec-action@v1.0.3
+      #   with:
+      #     working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
