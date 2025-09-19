@@ -65,3 +65,65 @@ resource "helm_release" "aws_lb_controller" {
 
   depends_on = [kubernetes_service_account.alb_controller_sa]
 }
+
+
+
+
+# IAM Role for ALB Controller in retail-dev
+resource "aws_iam_role" "alb_controller_retail_dev" {
+  name = "alb-controller-role-retail-dev"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Federated = "arn:aws:iam::733110823125:oidc-provider/oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
+        },
+        Action = "sts:AssumeRoleWithWebIdentity",
+        Condition = {
+          StringEquals = {
+            "oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5:sub" = "system:serviceaccount:retail-dev:aws-load-balancer-controller"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# Attach AWSLoadBalancerControllerIAMPolicy
+resource "aws_iam_role_policy_attachment" "alb_controller_attach_retail_dev" {
+  role       = aws_iam_role.alb_controller_retail_dev.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+}
+
+# Kubernetes Service Account in retail-dev
+resource "kubernetes_service_account" "alb_controller_sa_retail_dev" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "retail-dev"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller_retail_dev.arn
+    }
+  }
+}
+
+# Helm release for ALB Controller in retail-dev
+resource "helm_release" "aws_lb_controller_retail_dev" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "retail-dev"
+
+  values = [
+    yamlencode({
+      clusterName    = aws_eks_cluster.eks.name
+      serviceAccount = { create = false, name = kubernetes_service_account.alb_controller_sa_retail_dev.metadata[0].name }
+      region         = local.region
+      vpcId          = aws_vpc.altsch_vpc.id
+    })
+  ]
+
+  depends_on = [kubernetes_service_account.alb_controller_sa_retail_dev]
+}
