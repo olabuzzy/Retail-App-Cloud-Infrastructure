@@ -48,15 +48,3 @@ resource "aws_subnet" "public_az2" {
   }
 }
 
-resource "aws_subnet" "public_az3" {
-  vpc_id                  = aws_vpc.altsch_vpc.id
-  cidr_block              = "10.0.0.128/26"
-  availability_zone       = local.zone2
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name                                                   = "${local.env}-public_subnet-${local.zone2}"
-    "kubernetes.io/role/elb"                               = "1"
-    "kubernetes.io/cluster/${local.env}-${local.eks_name}" = "owned"
-  }
-}
