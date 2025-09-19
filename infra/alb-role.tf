@@ -39,7 +39,6 @@
 locals {
   kube_system_namespace    = "kube-system"
   alb_service_account_name = "alb-controller"
-  efs_service_account_name = "efs-controller"
   system_service_accounts = [
     "${local.kube_system_namespace}:${local.alb_service_account_name}"
   ]
