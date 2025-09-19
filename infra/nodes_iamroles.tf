@@ -1,7 +1,7 @@
 resource "aws_iam_role" "nodes" {
   name = "${local.env}-${local.eks_name}-eks_nodes"
 
- assume_role_policy = jsonencode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
       Effect = "Allow",
@@ -11,7 +11,7 @@ resource "aws_iam_role" "nodes" {
       Action = "sts:AssumeRole"
     }]
   })
-} 
+}
 
 resource "aws_iam_role_policy_attachment" "eksnode_worker_node_policy" {
   role       = aws_iam_role.nodes.name
@@ -29,18 +29,18 @@ resource "aws_iam_role_policy_attachment" "eksnode_container_registry_read_only"
 }
 
 resource "aws_eks_node_group" "general" {
-  cluster_name         = aws_eks_cluster.eks.name
-  version              = local.eks_version
-  node_group_name      = "general"
-  node_role_arn        = aws_iam_role.nodes.arn 
+  cluster_name    = aws_eks_cluster.eks.name
+  version         = local.eks_version
+  node_group_name = "general"
+  node_role_arn   = aws_iam_role.nodes.arn
 
-  subnet_ids = [ 
+  subnet_ids = [
     aws_subnet.public_az1.id,
     aws_subnet.public_az2.id
-   ]
+  ]
 
-  
-  capacity_type = "ON_DEMAND"
+
+  capacity_type  = "ON_DEMAND"
   instance_types = ["t2.small"]
 
 
@@ -62,14 +62,14 @@ resource "aws_eks_node_group" "general" {
     Name = "${local.env}-${local.eks_name}-node_instance"
   }
 
-  depends_on = [ 
+  depends_on = [
     aws_iam_role_policy_attachment.eksnode_worker_node_policy,
     aws_iam_role_policy_attachment.eksnode_cni_policy,
     aws_iam_role_policy_attachment.eksnode_container_registry_read_only
-   ]
+  ]
 
   # Allow external changes without Terraform plan difference
   lifecycle {
-    ignore_changes = [ scaling_config[0].desired_size ]
+    ignore_changes = [scaling_config[0].desired_size]
   }
 }

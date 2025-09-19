@@ -15,8 +15,8 @@ resource "aws_route_table" "public-rt" {
   vpc_id = aws_vpc.altsch_vpc.id # Replace with your actual VPC ID
 
   route {
-    cidr_block = "0.0.0.0/0"            # Destination: Anywhere
-    gateway_id = aws_internet_gateway.igw.id     # Replace with your Internet Gateway ID
+    cidr_block = "0.0.0.0/0"                 # Destination: Anywhere
+    gateway_id = aws_internet_gateway.igw.id # Replace with your Internet Gateway ID
   }
   route {
     cidr_block = "10.0.0.0/24"
@@ -38,11 +38,11 @@ resource "aws_route_table" "public-rt" {
 # }
 
 resource "aws_route_table_association" "public_az1" {
-  subnet_id = aws_subnet.public_az1.id
+  subnet_id      = aws_subnet.public_az1.id
   route_table_id = aws_route_table.public-rt.id
 }
 
 resource "aws_route_table_association" "public_az2" {
-  subnet_id = aws_subnet.public_az2.id
+  subnet_id      = aws_subnet.public_az2.id
   route_table_id = aws_route_table.public-rt.id
 }
