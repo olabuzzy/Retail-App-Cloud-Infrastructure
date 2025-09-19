@@ -51,6 +51,17 @@ resource "helm_release" "aws_lb_controller" {
   depends_on = [kubernetes_service_account.alb_controller_sa]
 }
 
+data "aws_eks_cluster" "eks" {
+  name = "staging-altsch_project"
+}
+
+data "aws_eks_cluster_auth" "eks" {
+  name = data.aws_eks_cluster.eks.name
+}
+
+data "aws_iam_openid_connect_provider" "eks" {
+  url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
+}
 
 
 # --- IAM Role for ALB Controller ---
@@ -62,12 +73,12 @@ resource "aws_iam_role" "alb_controller" {
     Statement = [{
       Effect = "Allow",
       Principal = {
-        Federated = aws_iam_openid_connect_provider.eks.arn
+        Federated = data.aws_iam_openid_connect_provider.eks.arn
       },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-          "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub" = "system:serviceaccount:retail-dev:aws-load-balancer-controller"
+          "${replace(data.aws_eks_cluster.eks.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
         }
       }
     }]
@@ -77,40 +88,5 @@ resource "aws_iam_role" "alb_controller" {
 resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
   role       = aws_iam_role.alb_controller.name
   policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
-}
-
-# --- Kubernetes Service Account ---
-resource "kubernetes_service_account" "alb_controller_sa" {
-  metadata {
-    name      = "aws-load-balancer-controller"
-    namespace = "retail-dev"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller.arn
-    }
-  }
-}
-
-# --- Deploy AWS Load Balancer Controller via Helm ---
-resource "helm_release" "aws_lb_controller" {
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  namespace  = "retail-store"
-  version    = "1.7.2"
-
-  set {
-    name  = "clusterName"
-    value = aws_eks_cluster.eks.name
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = kubernetes_service_account.alb_controller_sa.metadata[0].name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "false"
-  }
 }
 
