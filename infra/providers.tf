@@ -16,6 +16,11 @@ data "aws_eks_cluster_auth" "eks" {
   name = aws_eks_cluster.eks.name
 }
 
+provider "helm" {
+  # No args needed if the kubernetes provider is configured
+}
+
+
 terraform {
   required_version = ">=1.0"
 
