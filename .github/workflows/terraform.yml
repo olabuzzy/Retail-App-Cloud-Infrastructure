@@ -39,15 +39,19 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Run TFLint
-        uses: terraform-linters/tflint-action@v0.48.0
+        uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: v0.50.3
-          working_directory: infra
+          # working-directory: infra
+      
+      - name: Execute TFLint
+        working-directory: infra
+        run: tflint --init && tflint
 
       - name: Run tfsec (Security Scan)
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: infra
+          working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
@@ -86,15 +90,19 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Run TFLint
-        uses: terraform-linters/tflint-action@v0.48.0
+        uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: v0.50.3
-          working_directory: infra
+          # working-directory: infra
+
+      - name: Execute TFLint
+        working-directory: infra
+        run: tflint --init && tflint
 
       - name: Run tfsec (Security Scan)
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: infra
+          working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
@@ -139,15 +147,19 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Run TFLint
-        uses: terraform-linters/tflint-action@v0.48.0
+        uses: terraform-linters/setup-tflint@v4
         with:
           tflint_version: v0.50.3
-          working_directory: infra
+          # working-directory: infra
+      
+      - name: Execute TFLint
+        working-directory: infra
+        run: tflint --init && tflint
 
       - name: Run tfsec (Security Scan)
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: infra
+          working-directory: infra
 
       - name: Terraform Validate
         working-directory: infra
