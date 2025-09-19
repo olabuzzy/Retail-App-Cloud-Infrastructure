@@ -7,9 +7,8 @@ resource "aws_iam_policy" "AWSLoadBalancerControllerIAMPolicy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   path        = "/"
   description = "AWS Load Balancer Controller Policy"
+  policy      = file("iam-policy.json")
 
-
-  policy = file("utils/aws-lb-controller/iam-policy.json")
 
   tags = {
     Terraform   = "true"
