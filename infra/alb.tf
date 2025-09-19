@@ -42,7 +42,7 @@ resource "helm_release" "aws_lb_controller" {
 
   values = [
     yamlencode({
-      clusterName    = aws_eks_cluster.name
+      clusterName    = aws_eks_cluster.eks.name
       serviceAccount = { create = false, name = kubernetes_service_account.alb_controller_sa.metadata[0].name }
       region         = local.region
       vpcId          = aws_vpc.altsch_vpc.id
