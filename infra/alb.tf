@@ -5,6 +5,10 @@ resource "aws_iam_policy" "alb_controller" {
   policy      = file("iam-policy.json")
 }
 
+data "aws_iam_openid_connect_provider" "eks" {
+  url = "https://oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
+}
+
 # IAM Role for ALB Controller
 resource "aws_iam_role" "alb_controller_role" {
   name = "alb-controller-role"
@@ -14,7 +18,7 @@ resource "aws_iam_role" "alb_controller_role" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Federated = aws_iam_openid_connect_provider.eks.arn
+        Federated = data.aws_iam_openid_connect_provider.eks.arn
       }
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
