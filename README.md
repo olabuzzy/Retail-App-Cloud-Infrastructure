@@ -109,8 +109,12 @@ This project successfully demonstrated the deployment of a retail application on
 - Infrastructure as Code with Terraform using a file-per-resource approach  
 - Secure, scalable application hosting on EKS  
 - Automated CI/CD pipeline for infrastructure with GitHub Actions  
-- Integration of Namecheap DNS with AWS ALB and ACM for SSL termination  
+- Integration of Namecheap DNS with AWS ALB and ACM for SSL termination
+
+## USER -ACCESS
+- I provisioned an IAM user in AWS and integrated it with the Kubernetes cluster through RBAC (Role-Based Access Control). Using this setup, I bound the user’s AWS identity to a Kubernetes role, assigning permissions that allow the user to read, list, and describe cluster resources. This ensures secure, fine-grained access control while maintaining limited privilege.
 
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
