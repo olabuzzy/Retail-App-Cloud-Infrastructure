@@ -137,11 +137,12 @@ aws eks update-kubeconfig \
   ##### Test Permissions
   ```
   kubectl get pods
-  kubectl get pods -namespace retail-dev  #Add namespace as most of the services and deployments were deployed in retail-dev namespace
+  kubectl get pods --namespace retail-dev  #Add namespace as most of the services and deployments were deployed in retail-dev namespace
   ```
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
 
 
