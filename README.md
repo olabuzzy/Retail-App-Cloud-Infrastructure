@@ -133,9 +133,16 @@ aws eks update-kubeconfig \
   
 - --profile dev-readonly tells AWS CLI to use the new IAM user.
 - --alias adds a context name so you can easily switch in kubectl
+
+  ##### Test Permissions
+  ```
+  kubectl get pods
+  kubectl get pods -namespace retail-dev  #Add namespace as most of the services and deployments were deployed in retail-dev namespace
+  ```
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
 
 
