@@ -123,17 +123,20 @@ This project successfully demonstrated the deployment of a retail application on
 -  Set output format in json and this will store your credentials in ~/.aws/credentials
 -  
 ##### Update Kubeconfig for your user
+```
 aws eks update-kubeconfig \
   --region eu-west-2 \
   --name your-cluster-name \
   --profile dev-readonly \
   --alias dev-readonly
+```
   
 - --profile dev-readonly tells AWS CLI to use the new IAM user.
 - --alias adds a context name so you can easily switch in kubectl
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
 
 
