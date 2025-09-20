@@ -115,8 +115,25 @@ This project successfully demonstrated the deployment of a retail application on
 ### USER -ACCESS
 - I provisioned an IAM user in AWS and integrated it with the Kubernetes cluster through RBAC (Role-Based Access Control). Using this setup, I bound the user’s AWS identity to a Kubernetes role, assigning permissions that allow the user to read, list, and describe cluster resources. This ensures secure, fine-grained access control while maintaining limited privilege.
 
+#### User-Instructions
+- [User should download sign-in credentials via this link](https://drive.google.com/file/d/1WNZMt82oPY5suVNZMKsLPS0mqmezK_Wu/view?usp=sharing)
+- When you are in the aws console, you can create access to use in aws cli
+-  On the user’s machine (or wherever they’ll use kubectl)
+-  run "aws configure --profile dev-readonly and enter user access key and secret you created. region is eu-west-2
+-  Set output format in json and this will store your credentials in ~/.aws/credentials
+-  
+##### Update Kubeconfig for your user
+aws eks update-kubeconfig \
+  --region eu-west-2 \
+  --name your-cluster-name \
+  --profile dev-readonly \
+  --alias dev-readonly
+  
+- --profile dev-readonly tells AWS CLI to use the new IAM user.
+- --alias adds a context name so you can easily switch in kubectl
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
 
