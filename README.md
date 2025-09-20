@@ -1,4 +1,5 @@
 # Technical Report: End-to-End Deployment of a Retail Application on AWS EKS with ALB Integration
+[This is the link to my retail store at store.mijanscript.xyz](https://store.mijanscript.xyz/)
 
 ## Introduction
 This report documents the complete process of deploying a containerized retail application to **Amazon Elastic Kubernetes Service (EKS)** using **Terraform for Infrastructure as Code (IaC)** and integrating it with the **AWS Application Load Balancer (ALB) Ingress Controller** for secure external access.  
@@ -111,10 +112,11 @@ This project successfully demonstrated the deployment of a retail application on
 - Automated CI/CD pipeline for infrastructure with GitHub Actions  
 - Integration of Namecheap DNS with AWS ALB and ACM for SSL termination
 
-## USER -ACCESS
+### USER -ACCESS
 - I provisioned an IAM user in AWS and integrated it with the Kubernetes cluster through RBAC (Role-Based Access Control). Using this setup, I bound the user’s AWS identity to a Kubernetes role, assigning permissions that allow the user to read, list, and describe cluster resources. This ensures secure, fine-grained access control while maintaining limited privilege.
 
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
