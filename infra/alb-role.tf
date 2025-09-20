@@ -1,77 +1,98 @@
-# locals {
-#   k8s_aws_lb_service_account_namespace = "kube-system"
-#   k8s_aws_lb_service_account_name      = "aws-load-balancer-controller"
-# }
-
-# resource "aws_iam_policy" "AWSLoadBalancerControllerIAMPolicy" {
+# ############################
+# # IAM Policy for ALB Controller
+# ############################
+# resource "aws_iam_policy" "alb_controller" {
 #   name        = "AWSLoadBalancerControllerIAMPolicy"
-#   path        = "/"
-#   description = "AWS Load Balancer Controller Policy"
-#   policy      = file("iam-policy.json")
-
-
-#   tags = {
-#     Terraform   = "true"
-#     Environment = local.env
-#   }
-
+#   description = "Policy for AWS Load Balancer Controller"
+#   policy      = file("utils/aws-lb-controller/iam-policy.json")
 # }
 
-# module "iam_assumable_role_aws_lb" {
-#   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-#   version                       = "3.6.0"
-#   create_role                   = true
-#   role_name                     = "AWSLoadBalancerControllerIAMRole"
-#   provider_url                  = "oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
-#   role_policy_arns              = [aws_iam_policy.AWSLoadBalancerControllerIAMPolicy.arn]
-#   oidc_fully_qualified_subjects = ["system:serviceaccount:${local.k8s_aws_lb_service_account_namespace}:${local.k8s_aws_lb_service_account_name}"]
+# ############################
+# # IAM Role for ALB Controller
+# ############################
+# resource "aws_iam_role" "alb_controller_role" {
+#   name = "alb-controller-role"
 
-#   tags = {
-#     Terraform   = "true"
-#     Environment = local.env
-#   }
-
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Principal = {
+#           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+#         },
+#         Action = "sts:AssumeRoleWithWebIdentity",
+#         Condition = {
+#           StringEquals = {
+#             "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+#           }
+#         }
+#       }
+#     ]
+#   })
 # }
 
+# ############################
+# # Attach Policy to Role
+# ############################
+# resource "aws_iam_role_policy_attachment" "alb_controller_attach" {
+#   role       = aws_iam_role.alb_controller_role.name
+#   policy_arn = aws_iam_policy.alb_controller.arn
+# }
+
+# ############################
+# # Service Account for ALB Controller
+# ############################
+# resource "kubernetes_service_account" "alb_controller_sa" {
+#   metadata {
+#     name      = "aws-load-balancer-controller"
+#     namespace = "kube-system"
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = aws_iam_role.alb_controller_role.arn
+#     }
+#   }
+# }
+
+# ############################
+# # Helm Release for ALB Controller
+# ############################
+# resource "helm_release" "aws_lb_controller" {
+#   name       = "aws-load-balancer-controller"
+#   repository = "https://aws.github.io/eks-charts"
+#   chart      = "aws-load-balancer-controller"
+#   namespace  = "kube-system"
+
+#   values = [
+#     yamlencode({
+#       clusterName    = module.eks.cluster_name
+#       region         = local.region
+#       vpcId          = aws_vpc.altsch_vpc.id
+#       serviceAccount = {
+#         create = false
+#         name   = kubernetes_service_account.alb_controller_sa.metadata[0].name
+#       }
+#     })
+#   ]
+
+#   depends_on = [
+#     kubernetes_service_account.alb_controller_sa,
+#     aws_iam_role_policy_attachment.alb_controller_attach
+#   ]
+# }
+
+# ############################
+# # Data Sources
+# ############################
+# data "aws_caller_identity" "current" {}
 
 
 
-locals {
-  kube_system_namespace    = "kube-system"
-  alb_service_account_name = "alb-controller"
-  system_service_accounts = [
-    "${local.kube_system_namespace}:${local.alb_service_account_name}"
-  ]
-}
+# MORE EXPLANATION
+# Instead of module.vpc.vpc_id
+# vpc_id = aws_vpc.my_vpc.id
 
-resource "kubernetes_service_account" "alb" {
-  metadata {
-    name      = local.alb_service_account_name
-    namespace = local.kube_system_namespace
-    labels = {
-      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
-      "app.kubernetes.io/component" = "controller"
-    }
-    annotations = {
-      "eks.amazonaws.com/role-arn" = module.vpc_cni_irsa.iam_role_arn
-    }
-  }
-}
+# # Instead of module.eks.cluster_name
+# cluster_name = aws_eks_cluster.my_cluster.name
 
-module "vpc_cni_irsa" {
-
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 4.12"
-
-  role_name_prefix = "vpc-cni-irsa-"
-
-  attach_load_balancer_controller_policy = true
-
-  oidc_providers = {
-    main = {
-      provider_arn               = "arn:aws:iam::733110823125:oidc-provider/oidc.eks.eu-west-2.amazonaws.com/id/E74E4B1A5FD9A4982C1E2B929D44F1F5"
-      namespace_service_accounts = local.system_service_accounts
-    }
-  }
-
-}
+# # Instead of module.eks.cluster_oidc_issuer_url
+# provider_url = replace(aws_eks_cluster.my_cluster.identity[0].oidc[0].issuer, "https://", "")
