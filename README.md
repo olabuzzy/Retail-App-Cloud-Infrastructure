@@ -1,5 +1,5 @@
 # Technical Report: End-to-End Deployment of a Retail Application on AWS EKS with ALB Integration
-[This is the link to my retail store at store.mijanscript.xyz](https://store.mijanscript.xyz/)
+[This is the link to my demo store](http://a49440a8ac1a24b19af46f1618ba1ab4-893316149.eu-west-2.elb.amazonaws.com/)
 PS: If link does not work, the instance has likely been stopped to save cost
 
 ## Introduction
@@ -72,7 +72,7 @@ annotations:
 ---
 
 ## 5. SSL Certificate with ACM
-A certificate for `store.mijanscript.xyz` was provisioned in **AWS Certificate Manager (ACM)**. Validation was completed via **CNAME DNS records** in Namecheap.  
+A certificate for `http://a49440a8ac1a24b19af46f1618ba1ab4-893316149.eu-west-2.elb.amazonaws.com/` was provisioned in **AWS Certificate Manager (ACM)**. Validation was completed via **CNAME DNS records** in Namecheap.  
 
 Once validated, the certificate was attached to the ALB via Ingress annotations, enabling secure HTTPS access.  
 
@@ -80,7 +80,7 @@ Once validated, the certificate was attached to the ALB via Ingress annotations,
 
 ## 6. DNS Configuration with Namecheap
 Instead of Route 53, **Namecheap** was used for DNS management.  
-- An **A record** was created for `store.mijanscript.xyz` pointing to the ALB’s DNS name.  
+- An **A record** was created for `http://a49440a8ac1a24b19af46f1618ba1ab4-893316149.eu-west-2.elb.amazonaws.com/` pointing to the ALB’s DNS name.  
 - DNS propagation ensured that both HTTP and HTTPS routes became accessible.  
 
 ---
@@ -143,6 +143,7 @@ aws eks update-kubeconfig \
 This deployment approach is production-ready and can be extended for scaling, monitoring, and further automation.  
 
 ---
+
 
 
 
